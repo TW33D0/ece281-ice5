@@ -11,8 +11,8 @@
 --| ---------------------------------------------------------------------------
 --|
 --| FILENAME      : MooreElevatorController_tb.vhd (TEST BENCH)
---| AUTHOR(S)     : Capt Phillip Warner, Capt Dan Johnson, **Your Name Here**
---| CREATED       : 03/2017 Last modified on 06/24/2020
+--| AUTHOR(S)     : Capt Phillip Warner, Capt Dan Johnson, C3C Ty Hubert
+--| CREATED       : 03/2017 Last modified on 04/03/2024
 --| DESCRIPTION   : This file tests the Moore elevator controller module
 --|
 --| DOCUMENTATION : None
@@ -103,21 +103,27 @@ begin
         w_reset <= '1';  wait for k_clk_period;
             assert w_floor = "0010" report "bad reset" severity failure; 
         -- clear reset
-		
+		w_reset <= '0';
 		-- active UP signal
 		w_up_down <= '1'; 
-		
 		-- stay on each o_floor for 2 cycles and then move up to the next o_floor
         w_stop <= '1';  wait for k_clk_period * 2;
             assert w_floor = "0010" report "bad wait on floor2" severity failure;
         w_stop <= '0';  wait for k_clk_period;
             assert w_floor = "0011" report "bad up from floor2" severity failure;
 		-- rest of cases
-        
+		w_stop <= '1'; wait for k_clk_period;
+		    assert w_floor = "0011" report "bad stop on floor3" severity failure;
+        w_stop <= '0'; wait for k_clk_period * 2;
+            assert w_floor = "0100" report "bad up past floor4" severity failure;
         -- go back DOWN
-          
-		  	
-		wait; -- wait forever
+        w_up_down <= '0'; wait for k_clk_period;
+            assert w_floor = "0011" report "bad down for floor3" severity failure;
+        w_stop <= '1'; wait for k_clk_period * 2;
+            assert w_floor = "0011" report "bad stop on floor3" severity failure;
+        w_stop <= '0'; wait for k_clk_period * 4;
+            assert w_floor = "0001" report "bad down past floor1" severity failure;
+        wait; -- wait forever
 	end process;	
 	-----------------------------------------------------	
 	
